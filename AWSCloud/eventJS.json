@@ -1,0 +1,110 @@
+{
+	"message": "Good day, John of Seattle.",
+	"input": {
+		"resource": "/helloworld",
+		"path": "/helloworld",
+		"httpMethod": "GET",
+		"headers": {
+			"accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+			"accept-encoding": "gzip, deflate, br",
+			"accept-language": "es-ES,es;q=0.9,en;q=0.8,pt;q=0.7",
+			"Host": "etc4nmf615.execute-api.sa-east-1.amazonaws.com",
+			"sec-fetch-dest": "document",
+			"sec-fetch-mode": "navigate",
+			"sec-fetch-site": "none",
+			"upgrade-insecure-requests": "1",
+			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36",
+			"X-Amzn-Trace-Id": "Root=1-5ed27e04-efe8c59acfc0f1b8693bf55a",
+			"X-Forwarded-For": "200.68.77.159",
+			"X-Forwarded-Port": "443",
+			"X-Forwarded-Proto": "https"
+		},
+		"multiValueHeaders": {
+			"accept": [
+				"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+			],
+			"accept-encoding": [
+				"gzip, deflate, br"
+			],
+			"accept-language": [
+				"es-ES,es;q=0.9,en;q=0.8,pt;q=0.7"
+			],
+			"Host": [
+				"etc4nmf615.execute-api.sa-east-1.amazonaws.com"
+			],
+			"sec-fetch-dest": [
+				"document"
+			],
+			"sec-fetch-mode": [
+				"navigate"
+			],
+			"sec-fetch-site": [
+				"none"
+			],
+			"upgrade-insecure-requests": [
+				"1"
+			],
+			"User-Agent": [
+				"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36"
+			],
+			"X-Amzn-Trace-Id": [
+				"Root=1-5ed27e04-efe8c59acfc0f1b8693bf55a"
+			],
+			"X-Forwarded-For": [
+				"200.68.77.159"
+			],
+			"X-Forwarded-Port": [
+				"443"
+			],
+			"X-Forwarded-Proto": [
+				"https"
+			]
+		},
+		"queryStringParameters": {
+			"city": "Seattle",
+			"name": "John"
+		},
+		"multiValueQueryStringParameters": {
+			"city": [
+				"Seattle"
+			],
+			"name": [
+				"John"
+			]
+		},
+		"pathParameters": null,
+		"stageVariables": null,
+		"requestContext": {
+			"resourceId": "55wvgv",
+			"resourcePath": "/helloworld",
+			"httpMethod": "GET",
+			"extendedRequestId": "NWigxH-FGjQFZQA=",
+			"requestTime": "30/May/2020:15:38:44 +0000",
+			"path": "/test/helloworld",
+			"accountId": "657181639365",
+			"protocol": "HTTP/1.1",
+			"stage": "test",
+			"domainPrefix": "etc4nmf615",
+			"requestTimeEpoch": 1590853124869,
+			"requestId": "dceaddf0-f7f2-4bb1-ba6f-75a6644bf43c",
+			"identity": {
+				"cognitoIdentityPoolId": null,
+				"accountId": null,
+				"cognitoIdentityId": null,
+				"caller": null,
+				"sourceIp": "200.68.77.159",
+				"principalOrgId": null,
+				"accessKey": null,
+				"cognitoAuthenticationType": null,
+				"cognitoAuthenticationProvider": null,
+				"userArn": null,
+				"userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36",
+				"user": null
+			},
+			"domainName": "etc4nmf615.execute-api.sa-east-1.amazonaws.com",
+			"apiId": "etc4nmf615"
+		},
+		"body": null,
+		"isBase64Encoded": false
+	}
+}
