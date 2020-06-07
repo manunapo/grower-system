@@ -7,10 +7,11 @@ void setup()
 
 {
   //Revisar https://github.com/luisllamasbinaburo/Arduino-AsyncSerial
-  Serial.begin(115200);
+  Serial.begin(9600);
 
-  ESP01S.begin(115200);
+  ESP01S.begin(9600);
 
+  ESP01S.flush();
 }
 
 String content = "";
@@ -20,15 +21,23 @@ void loop()
 
 {
 
-  sendJSONtoESP();
+  String jsonToSend = senseAndBuildJSON();
+  Serial.println("To send: ");
+  Serial.println(jsonToSend);
+  
+  ESP01S.println(jsonToSend);
   Serial.println("DATA sent, waiting response: ");
   delay(2000);
+  
+  while( !ESP01S.available()){}
+  
   if (ESP01S.available()){
-
     while (ESP01S.available()) {
-      character = ESP01S.read();
-      content.concat(character);
+      content = ESP01S.readStringUntil( '\n' );
+      //character = ESP01S.read();
+      //content.concat(character);
     }
+    ESP01S.flush();
     Serial.println("--ESP answered: ");
     Serial.println(content);
     Serial.println("-----------------");
@@ -37,7 +46,7 @@ void loop()
   delay(10000);
 }
 
-void sendJSONtoESP(){
+String senseAndBuildJSON(){
     const size_t capacity = 4 * JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(5) + 130;
     DynamicJsonDocument doc(capacity);
     doc["size"] = 4;
@@ -60,7 +69,5 @@ void sendJSONtoESP(){
 
     String output;
     serializeJson(doc, output);
-    Serial.println("to send: ");
-    Serial.println(output);
-    ESP01S.print(output);
+    return output;
 }
