@@ -45,20 +45,12 @@
 
 int HTTPresponse;
 
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "time.google.com", 3600, 60000);
-
 unsigned int localPort = 2390;      // local port to listen for UDP packets
 IPAddress timeServerIP; 
-const char* ntpServerName = "time.google.com";
 
 const int sizeArduinoJson = 3;
 
 int totalDelay = 10000;
-
-// Last time the action was done
-String lastWateringTime = "";
-String lastLightingTime = "";
 
 // Total time to do the action
 int wateringTime = 5; // Expresed in seconds. 5 seconds
@@ -82,28 +74,27 @@ void setup() {
     delay ( 500 );
   }  
   Serial.println("--- WIFI  connected");
-  timeClient.begin();
+  
+  setUpTimeHandler();
+  setUpMemoryHandler();
 }
 
 
 
 void loop() {
 
-  timeClient.update();
-  String theTime = timeClient.getFormattedTime();
-
+  updateTime();
+  
   if( mayStartWatering()){
-    String command = "SW-" + wateringTime;
-    Serial.println(command);
-    lastWateringTime = theTime;
+    String watTime = (String) wateringTime;
+    Serial.println(  "SW-" + watTime);
     delay(1000);
     totalDelay -= 1000;
   }
 
   if( mayStartLighting()){
-    String command = "SL-" + lightingTime;
-    Serial.println(command);
-    lastLightingTime = theTime;
+    String ligTime = (String) lightingTime;
+    Serial.println( "SL-" + ligTime);
     delay(1000);
     totalDelay -= 1000;
   }
@@ -128,13 +119,6 @@ void loop() {
 }
 
 
-boolean mayStartWatering(){
-  return true;
-}
-
-boolean mayStartLighting(){
-  return true;
-}
 String buildJSON(String jsonArduino){
   
   const size_t capacityArduino = JSON_OBJECT_SIZE(sizeArduinoJson) + ( sizeArduinoJson * 10);
@@ -161,11 +145,11 @@ String buildJSON(String jsonArduino){
 
   JsonObject data4 = docAWS.createNestedObject("data4");
   data4["type"] = "bomb";
-  data4["value"] = lastWateringTime + "-" + amountOfWaterLastWatering();
+  data4["value"] = getLastWateringTime() + "-" + amountOfWaterLastWatering();
 
   JsonObject data5 = docAWS.createNestedObject("data5");
   data5["type"] = "light";
-  data5["value"] = lastLightingTime + "-" + amountOfLightLastLighting();;
+  data5["value"] = getLastLightingTime() + "-" + amountOfLightLastLighting();;
 
   String output;
   serializeJson(docAWS, output);

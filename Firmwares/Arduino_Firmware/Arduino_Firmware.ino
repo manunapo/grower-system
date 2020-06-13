@@ -1,73 +1,91 @@
 #include <SoftwareSerial.h>
 #include <ArduinoJson.h>
 
+/*
+  1 second = 1000 milliseconds
+  1 minute = 60 seconds
+  1 hour = 60 minutes
+  12 hours = 12 * 60 * 60 * 1000 = 43,200,000
+  15 minutes = 15 * 60 * 1000 = 900,000
+*/
+#define SAMPLING 900000UL
+unsigned long startTimeSampling;
+unsigned long startTimeWatering;
+
+boolean isWatering = false;
+unsigned long wateringSeconds = 1000;
+
 SoftwareSerial ESP01S(7, 8); // TX, RX
 
-void setup()
-
-{
-  //Revisar https://github.com/luisllamasbinaburo/Arduino-AsyncSerial
+void setup() {
   Serial.begin(9600);
 
   ESP01S.begin(9600);
 
   ESP01S.flush();
+
+  startTimeSampling = millis();
+  startTimeWatering = startTimeSampling;
+
+  String jsonToSend = senseAndBuildJSON();
+  Serial.print("To send: "); Serial.println(jsonToSend);
+  ESP01S.println(jsonToSend);
+
+  setUpBomb();
 }
 
 String content = "";
 char character;
 
-void loop()
+void loop() {
 
-{
+  unsigned long elapsedTime = millis();
 
-  String jsonToSend = senseAndBuildJSON();
-  Serial.println("To send: ");
-  Serial.println(jsonToSend);
-  
-  ESP01S.println(jsonToSend);
-  Serial.println("DATA sent, waiting response: ");
-  delay(2000);
-  
-  while( !ESP01S.available()){}
-  
-  if (ESP01S.available()){
+  if ( elapsedTime - startTimeSampling > SAMPLING) {
+    String jsonToSend = senseAndBuildJSON();
+    ESP01S.println(jsonToSend);
+    startTimeSampling = elapsedTime;
+    Serial.println("DATA SENT");
+  }
+
+  if( isWatering){
+    if ( elapsedTime - startTimeWatering > wateringSeconds) {
+      stopBombing();
+      isWatering = false;
+      startTimeWatering = elapsedTime;
+    }
+  }
+
+  if (ESP01S.available()) {
     while (ESP01S.available()) {
       content = ESP01S.readStringUntil( '\n' );
-      //character = ESP01S.read();
-      //content.concat(character);
+      if ( content.charAt(1) == 'W') {
+        unsigned int seconds = String(content.charAt(3)).toInt();
+        wateringSeconds = wateringSeconds * seconds;
+        startBombing();
+        isWatering = true;
+        startTimeWatering = elapsedTime;
+      }
+      if ( content.charAt(1) == 'L') {
+        //Serial.println("LIGHT!");
+      }
     }
-    ESP01S.flush();
-    Serial.println("--ESP answered: ");
-    Serial.println(content);
-    Serial.println("-----------------");
+
   }
-  
-  delay(10000);
+
+  Serial.println("...");
+  delay(500);
 }
 
-String senseAndBuildJSON(){
-    const size_t capacity = 4 * JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(5) + 130;
-    DynamicJsonDocument doc(capacity);
-    doc["size"] = 4;
+String senseAndBuildJSON() {
+  const size_t capacity = JSON_OBJECT_SIZE(3);
+  DynamicJsonDocument doc(capacity);
 
-    JsonObject data1 = doc.createNestedObject("data1");
-    data1["type"] = "moisure1";
-    data1["value"] = 1234;
+  doc["t1"] = 1111;
+  doc["m1"] = 2222;
+  doc["m2"] = 3333;
 
-    JsonObject data2 = doc.createNestedObject("data2");
-    data2["type"] = "level1";
-    data2["value"] = 1234;
-
-    JsonObject data3 = doc.createNestedObject("data3");
-    data3["type"] = "bomb1";
-    data3["value"] = "on";
-
-    JsonObject data4 = doc.createNestedObject("data4");
-    data4["type"] = "light1";
-    data4["value"] = "off";
-
-    String output;
-    serializeJson(doc, output);
-    return output;
+  String output;
+  serializeJson(doc, output);
+  return output;
 }
