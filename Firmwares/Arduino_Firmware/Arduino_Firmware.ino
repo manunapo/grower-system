@@ -81,9 +81,9 @@ String senseAndBuildJSON() {
   const size_t capacity = JSON_OBJECT_SIZE(3);
   DynamicJsonDocument doc(capacity);
 
-  doc["t1"] = 1111;
-  doc["m1"] = 2222;
-  doc["m2"] = 3333;
+  doc["t1"] = random(1000);
+  doc["m1"] = random(1000);
+  doc["m2"] = random(1000);
 
   String output;
   serializeJson(doc, output);

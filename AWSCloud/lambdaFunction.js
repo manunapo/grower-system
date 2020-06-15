@@ -40,27 +40,25 @@ exports.handler = async (event) => {
     if(event.httpMethod == "POST"){
         if (event.body) {
 			var size = 0;
-			var body = JSON.parse(event.body)
+			var body = JSON.parse(event.body);
             if (body.size){
                 size = body.size;
 			}
+			var params = {
+				TableName: "Measurements", 
+				Item: {
+				    ID: generateUUID(),
+					Time: event.requestContext.requestTime
+				}
+			};
 			for( let i = 1; i <= size; i++){
-				let variableName = "data" + i
+				let variableName = "data" + i;
 				let type = body[variableName].type;
 				let value = body[variableName].value;
-				let time = event.requestContext.requestTime;
-				const params = {
-					TableName: "Measurements", 
-					Item: { 
-						ID: generateUUID(),
-						Type: type,
-						Value: value,
-						Time: time
-					}
-				};
-				await documentClient.put(params).promise();
-				messageTmp = "Value Updated";
+				params['Item'][type] = value;
 			}
+			await documentClient.put(params).promise();
+			messageTmp = "Value Updated";
 		}
     }
     

@@ -1,9 +1,6 @@
 
 #include <EEPROM.h>
 
-// the current address in the EEPROM (i.e. which byte
-// we're going to write to next)
-
 int addrHourWatering = 0;
 int addrMinuteWatering = 1;
 int addrSecondsWatering = 2;
@@ -13,6 +10,13 @@ int addrHourLighting = 4;
 int addrMinuteLighting = 5;
 int addrSecondsLighting = 6;
 int addrDayLighting = 7;
+
+// Configuration Parameters
+int addrHourToWatering = 8;
+int addrHourToLighting = 9;
+
+int addrWateringTime = 10;
+int addrLightingTime = 11;
 
 void setUpMemoryHandler(){
   EEPROM.begin(512);
@@ -43,7 +47,7 @@ String getLastLightingTime(){
 }
 
 int getLastDayOfWatering(){
-  return EEPROM.read(addrDayWatering);;
+  return EEPROM.read(addrDayWatering);
 }
 
 void saveLastLighting(int hour, int minute, int seconds, int day){
@@ -56,4 +60,28 @@ void saveLastLighting(int hour, int minute, int seconds, int day){
 
 int getLastDayOfLighting(){
   return EEPROM.read(addrDayLighting);;
+}
+
+void saveConfigurationParameters(int hourToW, int hourToL, int waterTime, int lighTime){
+  EEPROM.write(addrHourToWatering, hourToW);
+  EEPROM.write(addrHourToLighting, hourToL);
+  EEPROM.write(addrWateringTime, waterTime);
+  EEPROM.write(addrLightingTime, lighTime);
+  EEPROM.commit();
+}
+
+int getHourToWatering(){
+  return EEPROM.read(addrHourToWatering);
+}
+
+int getHourToLighting(){
+  return EEPROM.read(addrHourToLighting);
+}
+
+int getWateringTime(){
+  return EEPROM.read(addrWateringTime);
+}
+
+int getLightingTime(){
+  return EEPROM.read(addrLightingTime);
 }

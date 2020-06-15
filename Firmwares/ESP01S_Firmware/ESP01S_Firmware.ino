@@ -10,15 +10,15 @@
 #include <WiFiUdp.h>
 
 /*
- * Receibe from arduino a compressed json
- * for less traffic in serial interface
- * {
+   Receibe from arduino a compressed json
+   for less traffic in serial interface
+   {
      "t1":  1234,
      "m1":  1234,
      "m2":  1234
   }
- * 
- * 
+
+
    {
      "size" : 4,
       "data1": {
@@ -46,15 +46,16 @@
 int HTTPresponse;
 
 unsigned int localPort = 2390;      // local port to listen for UDP packets
-IPAddress timeServerIP; 
+IPAddress timeServerIP;
 
 const int sizeArduinoJson = 3;
 
 int totalDelay = 10000;
 
-// Total time to do the action
-int wateringTime = 5; // Expresed in seconds. 5 seconds
-int lightingTime = 7; // Expresed in hours. 7 hours
+// Total time to do the action. Default values.
+// Definitive values will be loaded from memory
+int wateringTime = 5; // Expresed in seconds.
+int lightingTime = 7; // Expresed in hours.
 
 // A UDP instance to let us send and receive packets over UDP
 WiFiUDP udp;
@@ -63,72 +64,86 @@ void setup() {
 
   Serial.begin(9600);
   Serial.flush();
-  // Serial.setDebugOutput(true);
-
 
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
   while ( WiFi.status() != WL_CONNECTED ) {
-    Serial.println("WIFI not connected");
+    //Serial.println("WIFI not connected");
     delay ( 500 );
-  }  
-  Serial.println("--- WIFI  connected");
-  
-  setUpTimeHandler();
+  }
+  //Serial.println("--- WIFI  connected");
+
+  // First Set up Memory Handler
   setUpMemoryHandler();
+  delay( 500);
+  //saveConfigurationParameters(14,14,6,8);
+  //saveLastWatering( 12, 12, 12, 6);
+
+  setUpTimeHandler();
+
+  wateringTime = getWateringTime();
+  lightingTime = getLightingTime();
 }
 
 
 
 void loop() {
-
-  updateTime();
   
-  if( mayStartWatering()){
+  updateTime();
+
+  /*
+  Serial.println();
+  Serial.print(" Config Params: "); Serial.print( getWateringTime());Serial.print(" ");
+  Serial.print( getLightingTime()); Serial.print(" "); Serial.print( getHourToWatering());
+  Serial.print(" ");Serial.print( getHourToLighting()); Serial.println();
+
+  Serial.print(" Last Watering: "); Serial.println(getLastWateringTime());
+  */
+  
+  if ( mayStartWatering()) {
     String watTime = (String) wateringTime;
     Serial.println(  "SW-" + watTime);
     delay(1000);
     totalDelay -= 1000;
   }
 
-  if( mayStartLighting()){
+  if ( mayStartLighting()) {
     String ligTime = (String) lightingTime;
     Serial.println( "SL-" + ligTime);
     delay(1000);
     totalDelay -= 1000;
   }
- 
-  String sensorsCompressed = "{\"t1\":0,\"m1\":0,\"m2\":0}";
-  
-  if (Serial.available() ) {
 
+  String sensorsCompressed = "{\"t1\":0,\"m1\":0,\"m2\":0}";
+
+  if (Serial.available() ) {
+    boolean hadSome = false;
     while (Serial.available()) {
       sensorsCompressed = Serial.readStringUntil( '\n' );
+      hadSome = true;
     }
-    
-    makeHTTPS_POST( buildJSON(sensorsCompressed));  
-    delay(1000);
-    totalDelay -= 1000;
+    if ( hadSome) {
+      makeHTTPS_POST( buildJSON(sensorsCompressed));
+      delay(1000);
+      totalDelay -= 1000;
+    }
   }
-  //String json = "{\"t1\":1234,\"m1\":1234,\"m2\":1234}";
-  //Serial.println("JSON Build: ");
-  //Serial.println(buildJSON(json));
-  
+
   delay(totalDelay);
 }
 
 
-String buildJSON(String jsonArduino){
-  
+String buildJSON(String jsonArduino) {
+
   const size_t capacityArduino = JSON_OBJECT_SIZE(sizeArduinoJson) + ( sizeArduinoJson * 10);
   DynamicJsonDocument docArduino(capacityArduino);
   deserializeJson(docArduino, jsonArduino);
 
   int sizeAWSJson = sizeArduinoJson + 2; //2 = bomb + light;
-  const size_t capacityAWS = sizeAWSJson * JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(sizeAWSJson +1) + (sizeAWSJson * 10);
+  const size_t capacityAWS = sizeAWSJson * JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(sizeAWSJson + 1) + (sizeAWSJson * 10);
   DynamicJsonDocument docAWS(capacityAWS);
-  
+
   docAWS["size"] = sizeAWSJson;
 
   JsonObject data1 = docAWS.createNestedObject("data1");
@@ -145,11 +160,11 @@ String buildJSON(String jsonArduino){
 
   JsonObject data4 = docAWS.createNestedObject("data4");
   data4["type"] = "bomb";
-  data4["value"] = getLastWateringTime() + "-" + amountOfWaterLastWatering();
+  data4["value"] = getLastWateringTime() + " a:" + amountOfWaterLastWatering();
 
   JsonObject data5 = docAWS.createNestedObject("data5");
   data5["type"] = "light";
-  data5["value"] = getLastLightingTime() + "-" + amountOfLightLastLighting();;
+  data5["value"] = getLastLightingTime() + " a:" + amountOfLightLastLighting();;
 
   String output;
   serializeJson(docAWS, output);
@@ -157,12 +172,12 @@ String buildJSON(String jsonArduino){
   return output;
 }
 
-int amountOfWaterLastWatering(){
+int amountOfWaterLastWatering() {
   // In  2 minutes (120 seconds) the machine waters 100cc of water.
   return wateringTime * 100 / 120;
 }
 
-int amountOfLightLastLighting(){
+int amountOfLightLastLighting() {
   return lightingTime;
 }
 

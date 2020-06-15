@@ -3,12 +3,15 @@ const char* ntpServerName = "time.google.com";
 
 NTPClient timeClient(ntpUDP, ntpServerName, -10800, 60000);
 
-// -1 = do not do the action
-int hourToWatering = 15;
-int hourToLighting = 15;
+// -1 = do not do the action. Default values.
+// Definitive values will be loaded from memory
+int hourToWatering = 9;
+int hourToLighting = 9;
 
 void setUpTimeHandler(){
   timeClient.begin();
+  hourToWatering = getHourToWatering();
+  hourToLighting = getHourToLighting();
 }
 
 void updateTime(){
@@ -51,4 +54,13 @@ boolean todayHasLighted(){
     toR = true;
   }
   return toR;
+}
+
+String getTime(){
+  return timeClient.getFormattedTime();
+}
+
+void saveTime(){
+  saveLastWatering( timeClient.getHours(), timeClient.getMinutes(), timeClient.getSeconds(), timeClient.getDay());
+  saveLastLighting( timeClient.getHours(), timeClient.getMinutes(), timeClient.getSeconds(), timeClient.getDay());
 }
