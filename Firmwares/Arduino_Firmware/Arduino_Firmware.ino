@@ -27,6 +27,8 @@ void setup() {
   startTimeSampling = millis();
   startTimeWatering = startTimeSampling;
 
+  randomSeed(analogRead(0));
+  
   String jsonToSend = senseAndBuildJSON();
   Serial.print("To send: "); Serial.println(jsonToSend);
   ESP01S.println(jsonToSend);
@@ -38,7 +40,7 @@ String content = "";
 char character;
 
 void loop() {
-
+  
   unsigned long elapsedTime = millis();
 
   if ( elapsedTime - startTimeSampling > SAMPLING) {

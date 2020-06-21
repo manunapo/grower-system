@@ -1,31 +1,8 @@
-"body": {
-			"size" : 4,
-			"data1": {
-					"type": "moisure1",
-					"value": 1234
-			},
-			"data2": {
-					"type": "level1",
-					"value": 1234
-			},
-			"data3": {
-					"type": "bomb1",
-					"value": "on"
-			},
-			"data4": {
-					"type": "light1",
-					"value": "off"
-			}
-}
-
 'use strict';
 console.log('Loading hello world function');
 var AWS = require('aws-sdk');
 var dynamodb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
-const crypto = require("crypto");
- 
-// Generate unique id with no external dependencies
-const generateUUID = () => crypto.randomBytes(16).toString("hex");
+
 
 // Initialising the DynamoDB SDK
 const documentClient = new AWS.DynamoDB.DocumentClient();
@@ -44,11 +21,12 @@ exports.handler = async (event) => {
             if (body.size){
                 size = body.size;
 			}
+			console.log(event.requestContext.requestTime);
 			var params = {
 				TableName: "Measurements", 
 				Item: {
-				    ID: generateUUID(),
-					Time: event.requestContext.requestTime
+					ID: "data",
+					TimeEpoch: event.requestContext.requestTimeEpoch
 				}
 			};
 			for( let i = 1; i <= size; i++){

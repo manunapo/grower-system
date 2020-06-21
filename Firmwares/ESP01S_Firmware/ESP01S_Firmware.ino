@@ -60,6 +60,8 @@ int lightingTime = 7; // Expresed in hours.
 // A UDP instance to let us send and receive packets over UDP
 WiFiUDP udp;
 
+boolean hadSome = false;
+
 void setup() {
 
   Serial.begin(9600);
@@ -89,18 +91,18 @@ void setup() {
 
 
 void loop() {
-  
+
   updateTime();
 
   /*
-  Serial.println();
-  Serial.print(" Config Params: "); Serial.print( getWateringTime());Serial.print(" ");
-  Serial.print( getLightingTime()); Serial.print(" "); Serial.print( getHourToWatering());
-  Serial.print(" ");Serial.print( getHourToLighting()); Serial.println();
+    Serial.println();
+    Serial.print(" Config Params: "); Serial.print( getWateringTime());Serial.print(" ");
+    Serial.print( getLightingTime()); Serial.print(" "); Serial.print( getHourToWatering());
+    Serial.print(" ");Serial.print( getHourToLighting()); Serial.println();
 
-  Serial.print(" Last Watering: "); Serial.println(getLastWateringTime());
+    Serial.print(" Last Watering: "); Serial.println(getLastWateringTime());
   */
-  
+
   if ( mayStartWatering()) {
     String watTime = (String) wateringTime;
     Serial.println(  "SW-" + watTime);
@@ -118,13 +120,14 @@ void loop() {
   String sensorsCompressed = "{\"t1\":0,\"m1\":0,\"m2\":0}";
 
   if (Serial.available() ) {
-    boolean hadSome = false;
     while (Serial.available()) {
       sensorsCompressed = Serial.readStringUntil( '\n' );
       hadSome = true;
     }
+    String json =  buildJSON(sensorsCompressed);
     if ( hadSome) {
-      makeHTTPS_POST( buildJSON(sensorsCompressed));
+      makeHTTPS_POST(json);
+      hadSome = false;
       delay(1000);
       totalDelay -= 1000;
     }
@@ -138,7 +141,12 @@ String buildJSON(String jsonArduino) {
 
   const size_t capacityArduino = JSON_OBJECT_SIZE(sizeArduinoJson) + ( sizeArduinoJson * 10);
   DynamicJsonDocument docArduino(capacityArduino);
-  deserializeJson(docArduino, jsonArduino);
+  DeserializationError err = deserializeJson(docArduino, jsonArduino);
+
+  if (err) {
+    hadSome = false;
+    return "error";
+  }
 
   int sizeAWSJson = sizeArduinoJson + 2; //2 = bomb + light;
   const size_t capacityAWS = sizeAWSJson * JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(sizeAWSJson + 1) + (sizeAWSJson * 10);

@@ -31,19 +31,45 @@ void saveLastWatering(int hour, int minute, int seconds, int day){
 }
 
 String getLastWateringTime(){
-  String hour =(String) EEPROM.read(addrHourWatering);
-  String minute = (String)EEPROM.read(addrMinuteWatering);
-  String seconds = (String)EEPROM.read(addrSecondsWatering);
+  int hour = EEPROM.read(addrHourWatering);
+  int minute = EEPROM.read(addrMinuteWatering);
+  int second = EEPROM.read(addrSecondsWatering);
+  String hours = "" + (String)hour;
+  String minutes = "" + (String)minute;
+  String seconds = "" + (String)second ;
+  if( hour < 10){
+    hours = "0" + hours;
+  }
+  if( minute < 10){
+    minutes = "0" + minutes;
+  }
+  if( second < 10){
+    seconds = "0" + seconds;
+  }
+  
   String day = (String)EEPROM.read(addrDayWatering);
-  return hour + ":" + minute + ":" + seconds + " d:" + day; 
+  return hours + ":" + minutes + ":" + seconds + " d:" + day; 
 }
 
 String getLastLightingTime(){
-  String hour = (String) EEPROM.read(addrHourLighting);
-  String minute = (String)EEPROM.read(addrMinuteLighting);
-  String seconds = (String)EEPROM.read(addrSecondsLighting);
+  int hour = EEPROM.read(addrHourLighting);
+  int minute = EEPROM.read(addrMinuteLighting);
+  int second = EEPROM.read(addrSecondsLighting);
+  String hours = "" + (String)hour;
+  String minutes = "" +(String) minute;
+  String seconds = "" + (String)second ;
+  if( hour < 10){
+    hours = "0" + hours;
+  }
+  if( minute < 10){
+    minutes = "0" + minutes;
+  }
+  if( second < 10){
+    seconds = "0" + seconds;
+  }
+  
   String day = (String)EEPROM.read(addrDayLighting);
-  return hour + ":" + minute + ":" + seconds + " d:" + day; 
+  return hours + ":" + minutes + ":" + seconds + " d:" + day; 
 }
 
 int getLastDayOfWatering(){
