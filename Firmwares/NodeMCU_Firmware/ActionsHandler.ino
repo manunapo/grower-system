@@ -26,7 +26,7 @@ void stopBomb() {
   watering = false;
 }
 
-boolean isWatering(){
+boolean isWatering() {
   return watering;
 }
 
@@ -62,28 +62,28 @@ void processActionFromTopic(String json) {
   String lightS = (String)light;
   String fanS = (String)fan;
   String bombS = (String)bomb;
-  
-  if( lightS.equals("on"))
+
+  if ( lightS.equals("on"))
   {
     Serial.println("Turn On lights");
     startLight();
   }
-  if( fanS.equals("on"))
+  if ( fanS.equals("on"))
   {
     Serial.println("Turn On fan");
     startFan();
   }
-  if( bombS.equals("on"))
+  if ( bombS.equals("on"))
   {
     Serial.println("Turn On bomb");
     startBomb();
   }
-  if( lightS.equals("off"))
+  if ( lightS.equals("off"))
   {
     Serial.println("Turn Off lights");
     stopLight();
   }
-  if( fanS.equals("off"))
+  if ( fanS.equals("off"))
   {
     Serial.println("Turn Off fan");
     stopFan();
@@ -91,7 +91,7 @@ void processActionFromTopic(String json) {
 
   // Turn off bomb is not going to be use, because bomb will be automatically turned off
   // after 5 seconds ( or other pre-set time.
-  if( bombS.equals("off"))
+  if ( bombS.equals("off"))
   {
     Serial.println("Turn Off bomb ");
   }

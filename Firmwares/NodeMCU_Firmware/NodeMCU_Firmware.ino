@@ -24,12 +24,6 @@ const int MQTT_PORT = 8883;
 const char MQTT_SUB_TOPIC[] = "PepperActions";
 const char MQTT_PUB_TOPIC[] = "PepperMeasures";
 
-#ifdef USE_SUMMER_TIME_DST
-uint8_t DST = 1;
-#else
-uint8_t DST = 0;
-#endif
-
 WiFiClientSecure net;
 
 #ifdef ESP8266
@@ -43,7 +37,7 @@ MQTTClient client;
 unsigned long startTimeSampling = 0;
 unsigned long startTimeWatering = 0;
 
-
+unsigned long senseTime = 0;
 
 time_t now;
 time_t nowish = 1510592825;
@@ -51,7 +45,7 @@ time_t nowish = 1510592825;
 void NTPConnect(void)
 {
   Serial.print("Setting time using SNTP");
-  configTime(TIME_ZONE * 3600, DST * 3600, "pool.ntp.org", "time.nist.gov");
+  configTime(TIME_ZONE * 3600, 0, "pool.ntp.org", "time.nist.gov");
   now = time(nullptr);
   while (now < nowish)
   {
@@ -232,6 +226,9 @@ void setup()
   client.onMessage(messageReceived);
 
   connectToMqtt();
+
+  setUpSensors();
+  setUpActions();
 }
 
 void loop()
@@ -247,6 +244,12 @@ void loop()
     }
   }
 
+  if ( elapsedTime - senseTime > 5000) {
+    Serial.print("Analog Read: "); Serial.println(readGroundHumidity());
+    Serial.print("DHT Hum: "); Serial.println(readDHTHumidity());
+    Serial.print("DHT Temp: "); Serial.println(readDHTTemperature());
+    senseTime = elapsedTime;
+  }
 
   if (!client.connected())
   {

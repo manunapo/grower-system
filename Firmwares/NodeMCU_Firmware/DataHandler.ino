@@ -1,12 +1,15 @@
 #include "DHT.h"
 #include "defines.h"
 
-
 DHT dht(DHTPIN, DHTTYPE);
 
-void setUpSensors() {
+const int sensorPin = A0;
+
+void setUpSensors() { 
+  pinMode(DHTPIN, OUTPUT); 
+  digitalWrite(DHTPIN, LOW);
+  digitalWrite(DHTPIN, HIGH);
   dht.begin();
-  pinMode(DHTPIN, OUTPUT);
 }
 
 float readDHTHumidity() {
@@ -15,6 +18,10 @@ float readDHTHumidity() {
 
 float readDHTTemperature() {
   return dht.readTemperature();
+}
+
+int readGroundHumidity(){
+  return analogRead(GRDPIN);
 }
 
 String buildJSON() {
@@ -26,9 +33,9 @@ String buildJSON() {
   JsonObject state = doc.createNestedObject("state");
 
   JsonObject state_reported = state.createNestedObject("reported");
-  state_reported["ah"] = random(100);
-  state_reported["gh"] = random(100);
-  state_reported["at"] = random(100);
+  state_reported["ah"] = readDHTHumidity();
+  state_reported["gh"] = readGroundHumidity();
+  state_reported["at"] = readDHTTemperature();
   state_reported["lt"] = "on";
   serializeJson(doc, toRet);
 
