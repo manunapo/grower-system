@@ -118,12 +118,14 @@ void lwMQTTErrConnection(lwmqtt_return_code_t reason)
 
 void connectToMqtt(bool nonBlocking = false)
 {
+  digitalWrite(LD2PIN, LOW);
   Serial.print("MQTT connecting ");
   while (!client.connected())
   {
     if (client.connect(THINGNAME))
     {
       Serial.println("connected!");
+      digitalWrite(LD2PIN, HIGH);
       if (!client.subscribe(MQTT_SUB_TOPIC))
         lwMQTTErr(client.lastError());
     }
@@ -150,6 +152,7 @@ void connectToMqtt(bool nonBlocking = false)
 
 void connectToWiFi(String init_str)
 {
+  digitalWrite(LD3PIN, LOW);
   if (init_str != emptyString)
     Serial.print(init_str);
   while (WiFi.status() != WL_CONNECTED)
@@ -157,8 +160,10 @@ void connectToWiFi(String init_str)
     Serial.print(".");
     delay(1000);
   }
-  if (init_str != emptyString)
+  if (init_str != emptyString) {
+    digitalWrite(LD3PIN, HIGH);
     Serial.println("ok!");
+  }
 }
 
 void checkWiFiThenMQTT(void)
@@ -198,6 +203,9 @@ void sendData(void)
 
 void setup()
 {
+  setUpSensors();
+  setUpActions();
+
   Serial.begin(115200);
   delay(5000);
   Serial.println();
@@ -226,9 +234,6 @@ void setup()
   client.onMessage(messageReceived);
 
   connectToMqtt();
-
-  setUpSensors();
-  setUpActions();
 }
 
 void loop()
@@ -237,6 +242,9 @@ void loop()
 
   unsigned long elapsedTime = millis();
 
+  if (!isWatering()) {
+    startTimeWatering = elapsedTime;
+  }
   if ( isWatering()) {
     if ( elapsedTime - startTimeWatering > WATERING) {
       stopBomb();
