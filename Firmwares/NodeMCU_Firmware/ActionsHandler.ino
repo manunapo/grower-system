@@ -11,6 +11,14 @@ void setUpActions() {
 
   digitalWrite(FANPIN, HIGH);
   pinMode(FANPIN, OUTPUT);
+
+  pinMode(LD1PIN, OUTPUT);
+  pinMode(LD2PIN, OUTPUT);
+  pinMode(LD3PIN, OUTPUT);
+
+  digitalWrite(LD1PIN, LOW);
+  digitalWrite(LD2PIN, LOW);
+  digitalWrite(LD3PIN, LOW);
 }
 
 
